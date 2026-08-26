@@ -42,8 +42,9 @@ Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 # single expanded value; a raw multi-line %%description can be mangled/truncated.
 # (Per reviewer feedback; common Fedora idiom.)
 %global _description %{expand:
-azure-protected-vm-secrets provisions and decrypts host-protected secrets on
-Azure Confidential VMs (AMD SEV-SNP, Intel TDX). The package contains the
+azure-protected-vm-secrets detects the confidential-computing environment and
+decrypts host-provisioned secrets on Azure Confidential VMs (AMD SEV-SNP,
+Intel TDX). The package contains the
 azure-protected-secrets-tool CLI for invoking the supported operations
 (is-cvm, is-secrets-provisioning-enabled, unprotect-secret,
 validate-imds-metadata); the runtime shared library is in the -libs
