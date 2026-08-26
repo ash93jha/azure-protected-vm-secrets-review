@@ -53,9 +53,10 @@ subpackage.}
 # Same %%{expand} wrapping for the subpackage descriptions so their multi-line
 # paragraphs are passed as single expanded values (avoids mangling/truncation).
 %global _libs_description %{expand:
-Shared library implementing the host-secret unprotect and CVM-attestation
-helpers consumed by azure-protected-vm-secrets and any third-party
-application that links directly against libazure_protected_vm_secrets.}
+Shared library implementing the host-protected-secret unprotect and
+secrets-provisioning helpers consumed by azure-protected-vm-secrets and any
+third-party application that links directly against
+libazure_protected_vm_secrets.}
 
 %global _devel_description %{expand:
 C header file and unversioned shared-library symlink for building software
