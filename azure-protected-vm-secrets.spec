@@ -17,12 +17,16 @@ Summary:        Decrypts host-protected secrets in Azure Confidential VMs
 
 License:        MIT
 URL:            https://github.com/Azure/confidential-computing-cvm-guest-attestation
-# Source0 is a subtree tarball of just the azure-protected-vm-secrets/ component
-# (git archive of the azure-protected-vm-secrets-v%%{version} tag), hosted as a
-# release asset so the checksum is stable (GitHub's auto-generated whole-repo
-# archive is not byte-reproducible) and excludes unrelated large assets from
-# other monorepo components.
-Source0:        https://github.com/ash93jha/azure-protected-vm-secrets-review/releases/download/v%{version}/%{name}-%{version}.tar.gz
+# Source0 is a subtree tarball of just the azure-protected-vm-secrets/ component,
+# NOT GitHub's auto-generated whole-repo tag archive. The whole-repo archive is
+# not byte-reproducible (breaks the "sources match upstream" checksum check) and
+# carries ~27 MB of unrelated monorepo content (e.g. a demo .mp4) that is
+# impermissible in the SRPM. The subtree tarball is produced from the upstream
+# release tag azure-protected-vm-secrets-v%%{version} by the checked-in helper
+# packaging/fedora/generate-source-tarball.sh (git archive of the component
+# subtree). It is a bare filename (uploaded to the Fedora lookaside cache via
+# `fedpkg new-sources`), not a URL, to avoid pointing at a personal fork.
+Source0:        %{name}-%{version}.tar.gz
 # Man page for the CLI, maintained in this packaging directory (upstream
 # does not yet ship one; SHOULD per Fedora Packaging Guidelines §Manpages).
 Source1:        azure-protected-secrets-tool.1
