@@ -17,10 +17,22 @@ Summary:        Decrypts host-protected secrets in Azure Confidential VMs
 
 License:        MIT
 URL:            https://github.com/Azure/confidential-computing-cvm-guest-attestation
-Source0:        %{url}/archive/refs/tags/%{name}-v%{version}.tar.gz#/%{name}-%{version}.tar.gz
+# Source0 is a subtree tarball of just the azure-protected-vm-secrets/ component
+# (git archive of the azure-protected-vm-secrets-v%%{version} tag), hosted as a
+# release asset so the checksum is stable (GitHub's auto-generated whole-repo
+# archive is not byte-reproducible) and excludes unrelated large assets from
+# other monorepo components.
+Source0:        https://github.com/ash93jha/azure-protected-vm-secrets-review/releases/download/v%{version}/%{name}-%{version}.tar.gz
 # Man page for the CLI, maintained in this packaging directory (upstream
 # does not yet ship one; SHOULD per Fedora Packaging Guidelines §Manpages).
 Source1:        azure-protected-secrets-tool.1
+# The upstream LICENSE lives at the monorepo root, outside the component
+# subtree tarball, so it is carried as a separate Source rather than from Source0.
+Source2:        LICENSE
+
+# Azure Confidential VMs are x86_64 (SEV-SNP / TDX); CVM detection uses x86
+# CPUID and there is no aarch64 implementation, so restrict to x86_64.
+ExclusiveArch:  %{x86_64}
 
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
@@ -71,7 +83,7 @@ Summary:        Runtime shared library for %{name}
 # -devel, so it intentionally carries no sibling Requires (a Requires back on
 # the main CLI package would be circular). This satisfies the Fedora
 # "fully-versioned dependency in subpackages" guidance, which applies to the
-# consuming subpackages (main, -devel) that use %{?_isa}-qualified, fully
+# consuming subpackages (main, -devel) that use %%{?_isa}-qualified, fully
 # versioned Requires below.
 
 %description libs %{_libs_description}
@@ -85,10 +97,9 @@ Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 %description devel %{_devel_description}
 
 %prep
-# The tarball expands to confidential-computing-cvm-guest-attestation-<tag>/;
-# the SSPL component is in the azure-protected-vm-secrets/ subdirectory of
-# that tree. %%autosetup -n re-roots the build there.
-%autosetup -n confidential-computing-cvm-guest-attestation-%{name}-v%{version}/%{name}
+# Source0 is a subtree tarball whose top-level directory is
+# %{name}-%{version}/ (see git archive --prefix at release time).
+%autosetup -n %{name}-%{version}
 
 %conf
 %cmake
@@ -98,10 +109,10 @@ Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
 
 %install
 %cmake_install
-# The repo's top-level LICENSE file lives one level up from our build subdir.
-# Stage it into the install tree so %%license can find it relative to the
-# build dir below.
-install -D -m 0644 ../LICENSE %{_builddir}/%{buildsubdir}/LICENSE
+# The upstream LICENSE lives at the monorepo root (outside this component
+# subtree), so it is shipped as Source2 and staged into the build dir so
+# %%license can reference it below. -p preserves the original timestamp.
+install -D -p -m 0644 %{SOURCE2} %{_builddir}/%{buildsubdir}/LICENSE
 # Install the CLI man page (RPM compresses it automatically).
 install -D -p -m 0644 %{SOURCE1} %{buildroot}%{_mandir}/man1/azure-protected-secrets-tool.1
 # Keep the man page .TH version in sync with the package version automatically,
